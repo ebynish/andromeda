@@ -35,7 +35,7 @@ services:
 
   andromeda:
     build:
-      context: ./app
+      context: https://github.com/ebynish/andromeda-app.git
     container_name: andromeda
     environment:
       DATABASE_URL: postgresql://andromeda_user:andromeda_pass@postgres:5432/andromeda_db
