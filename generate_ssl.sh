@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Set domain names for which you want to generate SSL certificates
-DOMAINS=("keycloak.dkrrs.net" "andromeda.dkrrs.net")
+DOMAINS=("dkrrs.net")
 WEBROOT_PATH="/var/www/certbot"
 NGINX_CONF_DIR="/etc/nginx"
 
 # Run Certbot to generate SSL certificates
 docker-compose run --rm certbot certonly --webroot \
   --webroot-path="$WEBROOT_PATH" \
-  --email your-email@example.com \
+  --email cemehel@gmail.com \
   --agree-tos \
   --no-eff-email \
   "${DOMAINS[@]/#/--domains=}"

@@ -25,7 +25,7 @@ services:
       DB_DATABASE: andromeda_db
       DB_USER: andromeda_user
       DB_PASSWORD: andromeda_pass
-      KC_HOSTNAME: keycloak.dkrrs.net
+      KC_HOSTNAME: dkrrs.net
     ports:
       - "8080:8080"
     depends_on:
