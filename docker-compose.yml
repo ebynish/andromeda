@@ -59,11 +59,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./letsencrypt:/etc/letsencrypt
+      - ./nginx/default.conf:/etc/nginx/default.conf
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      - ./html:/usr/share/nginx/html:ro
-      - ../configs/nginx:/etc/nginx/templates/
       - static:/var/andromeda/static/
       - media:/var/andromeda/media/
     depends_on:
