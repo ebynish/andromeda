@@ -7,29 +7,44 @@ services:
     ports:
       - "5000:5000"
     environment:
-      POSTGRES_DB: andromeda_db
-      POSTGRES_USER: andromeda_user
-      POSTGRES_PASSWORD: andromeda_password
-      DB_HOST: postgres-db
-      DB_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      OIDC_OP_AUTHORIZATION_ENDPOINT: ${OIDC_OP_AUTHORIZATION_ENDPOINT}
+      OIDC_OP_JWKS_ENDPOINT: ${OIDC_OP_JWKS_ENDPOINT}
+      OIDC_OP_TOKEN_ENDPOINT: ${OIDC_OP_TOKEN_ENDPOINT}
+      OIDC_OP_USER_ENDPOINT: ${OIDC_OP_USER_ENDPOINT}
+      OIDC_RP_CLIENT_ID: ${OIDC_RP_CLIENT_ID}
+      OIDC_RP_CLIENT_SECRET: ${OIDC_RP_CLIENT_SECRET}
+      OIDC_PROJECT_ADMIN_ROLE: ${OIDC_PROJECT_ADMIN_ROLE}
+      OIDC_SERVER_ADMIN_ROLE: ${OIDC_SERVER_ADMIN_ROLE}
+      OIDC_SUPER_ADMIN_ROLE: ${OIDC_SUPER_ADMIN_ROLE}
+      OIDC_USER_ROLE: ${OIDC_USER_ROLE}
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
     depends_on:
       - postgres-db
+      - keycloak
     networks:
       - andromeda
-
   nginx:
     image: nginx:latest
     container_name: nginx-server
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
+      - ./static:/var/www/static
+      - ./media:/var/www/media
+    environment:
+      WEB_HOST: ${WEB_HOST}
     depends_on:
       - andromeda-app
-      - keycloak
     networks:
       - andromeda
 
@@ -37,11 +52,19 @@ services:
     image: quay.io/keycloak/keycloak:22.0.3
     container_name: keycloak
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      DB_VENDOR: postgres
+      DB_ADDR: ${DATABASE_HOST}
+      DB_DATABASE: ${KEYCLOAK_DB_NAME}
+      DB_USER: ${KEYCLOAK_DB_USER}
+      DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      JDBC_PARAMS: "ssl=false"
     command: start-dev
     ports:
       - "8080:8080"
+    depends_on:
+      - keycloak-db
     networks:
       - andromeda
 
@@ -49,13 +72,27 @@ services:
     image: postgres:15
     container_name: postgres-db
     environment:
-      POSTGRES_DB: andromeda_db
-      POSTGRES_USER: andromeda_user
-      POSTGRES_PASSWORD: andromeda_password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - andromeda
+
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     networks:
       - andromeda
 
@@ -70,6 +107,9 @@ services:
 
 volumes:
   postgres-data:
+  keycloak-data:
+  static:
+  media:
 
 networks:
   andromeda:

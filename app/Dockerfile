@@ -11,7 +11,7 @@ COPY entrypoint.sh /app/entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh
 
-RUN pip install Flask psycopg2-binary
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
