@@ -3,7 +3,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY app.py .
+# Install netcat-openbsd (alternative to netcat)
+RUN apt-get update && apt-get install -y netcat-openbsd
+
+COPY . /app
+COPY entrypoint.sh /app/entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
 
 RUN pip install Flask psycopg2-binary
 
